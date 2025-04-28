@@ -91,6 +91,7 @@ func (u *userUsecase) UpdateUser(id uint, user *entity.User) error {
 		return err
 	}
 	
+	user.ID = id
 	user.Password = string(password)
 
 	errUpdate := u.userRepo.Update(id, user)

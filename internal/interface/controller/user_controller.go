@@ -22,6 +22,24 @@ func NewUserController(db *gorm.DB) *UserController {
 	}
 }
 
+func (c *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	user, err := c.userUsecase.FindByIdUser(uint(id))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+}
+
 func (c *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := c.userUsecase.GetAllUsers()
 	if err != nil {
@@ -76,8 +94,6 @@ func (c *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	user.ID = uint(id)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)

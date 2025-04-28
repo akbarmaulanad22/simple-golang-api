@@ -39,18 +39,17 @@ func (r *userRepository) FindById(id uint) (entity.User, error) {
     // Query untuk mencari user berdasarkan ID
     result := r.db.First(&user, id)
 
-    // Handle error
-    if result.Error != nil {
-        // Jika record tidak ditemukan
-        if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-            return user, fmt.Errorf("user tidak ditemukan")
-        }
-        // Untuk kesalahan lainnya
-        return user, fmt.Errorf("terjadi kesalahan: %v", result.Error)
+    if result.Error == nil {
+    	return user, nil
     }
 
-    // Jika berhasil, kembalikan user tanpa error
-    return user, nil
+	// Jika record tidak ditemukan
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return user, fmt.Errorf("user tidak ditemukan")
+	}
+	
+	// Untuk kesalahan lainnya
+	return user, fmt.Errorf("terjadi kesalahan: %v", result.Error)
 }
 
 func (r *userRepository) Create(user *entity.User) error {
