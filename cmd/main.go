@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -56,10 +56,7 @@ func main() {
 		fmt.Printf("=========================================\n")
 		fmt.Printf("Server berjalan pada port %s...\n", port)
 		fmt.Printf("Endpoint yang tersedia:\n")
-		fmt.Printf("GET: http://localhost:%s/api/\n", port)
-		fmt.Printf("POST: http://localhost:%s/api/\n", port)
-		fmt.Printf("PUT: http://localhost:%s/api//{id}\n", port)
-		fmt.Printf("DELETE: http://localhost:%s/api//{id}\n", port)
+		fmt.Printf("http://localhost:%s/api/v1/user\n", port)
 
 		fmt.Printf("=========================================\n")
 

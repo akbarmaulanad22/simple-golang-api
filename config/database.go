@@ -26,16 +26,8 @@ func InitDB() *gorm.DB {
 	}
 
 	// Auto Migrate
-	db.AutoMigrate(&models.Absensi{})
-	db.AutoMigrate(&models.Beasiswa{})
-	db.AutoMigrate(&models.Dosen{})
-	db.AutoMigrate(&models.JadwalKuliah{})
-	db.AutoMigrate(&models.Mahasiswa{})
-	db.AutoMigrate(&models.MataKuliah{})
-	db.AutoMigrate(&models.Nilai{})
-	db.AutoMigrate(&models.Pengumuman{})
-	db.AutoMigrate(&models.RuangKelas{})
-	db.AutoMigrate(&models.Tugas{})
+	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Log{})
 
 
 	return db
