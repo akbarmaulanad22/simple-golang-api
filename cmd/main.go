@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"api/config"
+	"api/internal/interface/controller"
 	"api/internal/interface/middleware"
 	"api/internal/interface/route"
 
@@ -34,8 +35,18 @@ func main() {
 	router.Use(middleware.LoggingMiddleware)
 	router.Use(middleware.RecoveryMiddleware)
 
+	// === PUBLIC ROUTES (tanpa middleware) ===
+	authController := controller.NewAuthController(db)
+	
+    publicRoutes := router.PathPrefix("/").Subrouter()
+    publicRoutes.HandleFunc("/login", authController.Login).Methods("POST")
+
+	// === PROTECTED ROUTES (dengan middleware auth) ===
+    protectedRoutes := router.PathPrefix("/api/v1").Subrouter()
+    protectedRoutes.Use(middleware.AuthMiddleware)
+	
 	// Setup routes
-	route.SetupRoutes(router, db)
+	route.SetupRoutes(protectedRoutes, db)
 
 	// Konfigurasi server
 	port := os.Getenv("PORT")
