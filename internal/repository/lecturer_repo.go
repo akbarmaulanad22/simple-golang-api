@@ -26,7 +26,7 @@ func NewLecturerRepository(db *gorm.DB) LecturerRepository {
 
 func (r *lectureRepository) FindAll() ([]entity.Lecturer, error) {
 	var lectures []entity.Lecturer
-	if err := r.db.Preload("CreatedByUser").Find(&lectures).Error; err != nil {
+	if err := r.db.Find(&lectures).Error; err != nil {
 		return nil, err
 	}
 	return lectures, nil
@@ -37,7 +37,7 @@ func (r *lectureRepository) FindById(id uint) (entity.Lecturer, error) {
     var lecture entity.Lecturer
 
     // Query untuk mencari lecture berdasarkan ID
-    result := r.db.Preload("CreatedByUser").First(&lecture, id)
+    result := r.db.First(&lecture, id)
 
     if result.Error == nil {
     	return lecture, nil

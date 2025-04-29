@@ -58,7 +58,7 @@ func (c *GradeController) CreateGrade(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := c.gradeUsecase.CreateGrade(&grade)
+	err := c.gradeUsecase.CreateGrade(&grade, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,7 +96,7 @@ func (c *GradeController) UpdateGrade(w http.ResponseWriter, r *http.Request) {
 	}
 
 
-	err = c.gradeUsecase.UpdateGrade(uint(id), &grade)
+	err = c.gradeUsecase.UpdateGrade(uint(id), &grade, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,7 +126,7 @@ func (c *GradeController) DeleteGrade(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = c.gradeUsecase.DeleteGrade(uint(id))
+	err = c.gradeUsecase.DeleteGrade(uint(id), r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

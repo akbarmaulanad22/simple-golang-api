@@ -3,16 +3,18 @@ package usecase
 import (
 	"api/internal/entity"
 	"api/internal/repository"
+	"context"
 	"encoding/json"
+	"errors"
 
 	"gorm.io/gorm"
 )
 
 type GradeUsecase interface {
 	GetAllGrades() ([]entity.Grade, error)
-	CreateGrade(grade *entity.Grade) error
-	UpdateGrade(id uint, grade *entity.Grade) error
-	DeleteGrade(id uint) error
+	CreateGrade(grade *entity.Grade, ctx context.Context) error
+	UpdateGrade(id uint, grade *entity.Grade, ctx context.Context) error
+	DeleteGrade(id uint, ctx context.Context) error
 	FindByIdGrade(id uint) (entity.Grade, error)
 }
 
@@ -38,19 +40,12 @@ func (u *gradeUsecase) GetAllGrades() ([]entity.Grade, error) {
 	return u.gradeRepo.FindAll()
 }
 
-func (u *gradeUsecase) CreateGrade(grade *entity.Grade) error {
-	// currentGrade, err := osGrade.Current()
-	// if err != nil {
-	// 	return err
-	// }
+func (u *gradeUsecase) CreateGrade(grade *entity.Grade, ctx context.Context) error {
 	
-	// idInt, err := strconv.Atoi(currentGrade.Uid)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// id := new(uint)
-    // *id = uint(idInt)
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	
 	errCreate := u.gradeRepo.Create(grade)
 	if errCreate != nil {
@@ -63,7 +58,7 @@ func (u *gradeUsecase) CreateGrade(grade *entity.Grade) error {
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// GradeID: id,
+		UserID: userClaims.ID,
 		Action: "CREATE",
 		EntityType: "GRADE",
 		EntityID: grade.ID,
@@ -77,8 +72,12 @@ func (u *gradeUsecase) CreateGrade(grade *entity.Grade) error {
 	return nil
 }
 
-func (u *gradeUsecase) UpdateGrade(id uint, grade *entity.Grade) error {
+func (u *gradeUsecase) UpdateGrade(id uint, grade *entity.Grade, ctx context.Context) error {
 	
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errUpdate := u.gradeRepo.Update(id, grade)
 	if errUpdate != nil {
 		return errUpdate
@@ -92,7 +91,7 @@ func (u *gradeUsecase) UpdateGrade(id uint, grade *entity.Grade) error {
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// GradeID: id,
+		UserID: userClaims.ID,
 		Action: "UPDATE",
 		EntityType: "GRADE",
 		EntityID: id,
@@ -106,9 +105,14 @@ func (u *gradeUsecase) UpdateGrade(id uint, grade *entity.Grade) error {
 	return nil
 }
 
-func (u *gradeUsecase) DeleteGrade(id uint) error {
+func (u *gradeUsecase) DeleteGrade(id uint, ctx context.Context) error {
+	
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// GradeID: id,
+		UserID:userClaims.ID ,
 		Action: "DELETE",
 		EntityType: "GRADE",
 		EntityID: id,

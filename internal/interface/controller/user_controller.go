@@ -63,7 +63,7 @@ func (c *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := c.userUsecase.CreateUser(&user)
+	err := c.userUsecase.CreateUser(&user, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -94,7 +94,7 @@ func (c *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = c.userUsecase.UpdateUser(uint(id), &user)
+	err = c.userUsecase.UpdateUser(uint(id), &user, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -118,7 +118,7 @@ func (c *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = c.userUsecase.DeleteUser(uint(id))
+	err = c.userUsecase.DeleteUser(uint(id), r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

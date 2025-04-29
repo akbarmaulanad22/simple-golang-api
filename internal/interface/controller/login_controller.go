@@ -12,6 +12,7 @@ package controller
 import (
 	"api/config"
 	"api/internal/entity"
+	"api/internal/entity/request"
 	"api/internal/usecase"
 	"encoding/json"
 	"fmt"
@@ -33,56 +34,12 @@ func NewAuthController(db *gorm.DB) *AuthController {
     }
 }
 
-// func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
-//     var req request.Login
-//     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-//         http.Error(w, err.Error(), http.StatusBadRequest)
-//         return
-//     }
-
-//     res, err := ac.AuthUsecase.Login(req.Username, req.Password)
-//     if err != nil {
-//         http.Error(w, err.Error(), http.StatusUnauthorized)
-//         return
-//     }
-
-//     w.Header().Set("Content-Type", "application/json")
-//     json.NewEncoder(w).Encode(res)
-// }
-
-
-
-
-// Model User lokal untuk keperluan login
-type User struct {
-    gorm.Model
-    Username string `json:"username"`
-    Password string `json:"password"`
-}
-
-// Request Body Login
-type LoginRequest struct {
-    Username string `json:"username"`
-    Password string `json:"password"`
-}
-
-// Response Login
-type LoginResponse struct {
-    Token string `json:"token"`
-}
-
-// Claims tambahan selain standar jwt.StandardClaims
-type CustomClaims struct {
-    Username string `json:"username"`
-    jwt.StandardClaims
-}
-
 // Handler Login
 // func LoginHandler(db *gorm.DB) http.HandlerFunc {
 func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	db := config.InitDB()
 
-    var req LoginRequest
+    var req request.LoginRequest
         if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
             http.Error(w, "Invalid request body", http.StatusBadRequest)
             return
@@ -103,7 +60,8 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 
         // Buat custom claims
         expirationTime := time.Now().Add(24 * time.Hour)
-        claims := &CustomClaims{
+        claims := &entity.CustomClaims{
+            ID: user.ID,
             Username: user.Username,
             StandardClaims: jwt.StandardClaims{
                 ExpiresAt: expirationTime.Unix(),
@@ -128,7 +86,7 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 
         // Kirim token sebagai response
         w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(LoginResponse{
+        json.NewEncoder(w).Encode(entity.LoginResponse{
             Token: tokenString,
         })
 }

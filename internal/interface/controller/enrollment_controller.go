@@ -58,7 +58,7 @@ func (c *EnrollmentController) CreateEnrollment(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err := c.enrollmentUsecase.CreateEnrollment(&enrollment)
+	err := c.enrollmentUsecase.CreateEnrollment(&enrollment, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -85,7 +85,7 @@ func (c *EnrollmentController) UpdateEnrollment(w http.ResponseWriter, r *http.R
 
 	var enrollment entity.Enrollment
 	if err := json.NewDecoder(r.Body).Decode(&enrollment); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)	
 		return
 	}
 
@@ -96,7 +96,7 @@ func (c *EnrollmentController) UpdateEnrollment(w http.ResponseWriter, r *http.R
 	}
 
 
-	err = c.enrollmentUsecase.UpdateEnrollment(uint(id), &enrollment)
+	err = c.enrollmentUsecase.UpdateEnrollment(uint(id), &enrollment, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,7 +126,7 @@ func (c *EnrollmentController) DeleteEnrollment(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = c.enrollmentUsecase.DeleteEnrollment(uint(id))
+	err = c.enrollmentUsecase.DeleteEnrollment(uint(id), r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

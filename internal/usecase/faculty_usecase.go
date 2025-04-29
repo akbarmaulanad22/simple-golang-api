@@ -3,16 +3,18 @@ package usecase
 import (
 	"api/internal/entity"
 	"api/internal/repository"
+	"context"
 	"encoding/json"
+	"errors"
 
 	"gorm.io/gorm"
 )
 
 type FacultyUsecase interface {
 	GetAllFacultys() ([]entity.Faculty, error)
-	CreateFaculty(faculty *entity.Faculty) error
-	UpdateFaculty(id uint, faculty *entity.Faculty) error
-	DeleteFaculty(id uint) error
+	CreateFaculty(faculty *entity.Faculty, ctx context.Context) error
+	UpdateFaculty(id uint, faculty *entity.Faculty, ctx context.Context) error	
+	DeleteFaculty(id uint, ctx context.Context) error
 	FindByIdFaculty(id uint) (entity.Faculty, error)
 }
 
@@ -38,20 +40,12 @@ func (u *facultyUsecase) GetAllFacultys() ([]entity.Faculty, error) {
 	return u.facultyRepo.FindAll()
 }
 
-func (u *facultyUsecase) CreateFaculty(faculty *entity.Faculty) error {
-	// currentFaculty, err := osFaculty.Current()
-	// if err != nil {
-	// 	return err
-	// }
+func (u *facultyUsecase) CreateFaculty(faculty *entity.Faculty, ctx context.Context) error {
 	
-	// idInt, err := strconv.Atoi(currentFaculty.Uid)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// id := new(uint)
-    // *id = uint(idInt)
-	
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errCreate := u.facultyRepo.Create(faculty)
 	if errCreate != nil {
 		return errCreate
@@ -63,7 +57,7 @@ func (u *facultyUsecase) CreateFaculty(faculty *entity.Faculty) error {
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// FacultyID: id,
+		UserID: userClaims.ID,
 		Action: "CREATE",
 		EntityType: "FACULTY",
 		EntityID: faculty.ID,
@@ -77,8 +71,12 @@ func (u *facultyUsecase) CreateFaculty(faculty *entity.Faculty) error {
 	return nil
 }
 
-func (u *facultyUsecase) UpdateFaculty(id uint, faculty *entity.Faculty) error {
+func (u *facultyUsecase) UpdateFaculty(id uint, faculty *entity.Faculty, ctx context.Context) error {
 	
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errUpdate := u.facultyRepo.Update(id, faculty)
 	if errUpdate != nil {
 		return errUpdate
@@ -92,7 +90,7 @@ func (u *facultyUsecase) UpdateFaculty(id uint, faculty *entity.Faculty) error {
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// FacultyID: id,
+		UserID: userClaims.ID,
 		Action: "UPDATE",
 		EntityType: "FACULTY",
 		EntityID: id,
@@ -106,9 +104,14 @@ func (u *facultyUsecase) UpdateFaculty(id uint, faculty *entity.Faculty) error {
 	return nil
 }
 
-func (u *facultyUsecase) DeleteFaculty(id uint) error {
+func (u *facultyUsecase) DeleteFaculty(id uint, ctx context.Context) error {
+
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// FacultyID: id,
+		UserID: userClaims.ID,
 		Action: "DELETE",
 		EntityType: "FACULTY",
 		EntityID: id,

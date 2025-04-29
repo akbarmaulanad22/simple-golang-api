@@ -3,16 +3,18 @@ package usecase
 import (
 	"api/internal/entity"
 	"api/internal/repository"
+	"context"
 	"encoding/json"
+	"errors"
 
 	"gorm.io/gorm"
 )
 
 type EnrollmentUsecase interface {
 	GetAllEnrollments() ([]entity.Enrollment, error)
-	CreateEnrollment(enrollment *entity.Enrollment) error
-	UpdateEnrollment(id uint, enrollment *entity.Enrollment) error
-	DeleteEnrollment(id uint) error
+	CreateEnrollment(enrollment *entity.Enrollment, ctx context.Context) error
+	UpdateEnrollment(id uint, enrollment *entity.Enrollment, ctx context.Context) error
+	DeleteEnrollment(id uint, ctx context.Context) error
 	FindByIdEnrollment(id uint) (entity.Enrollment, error)
 }
 
@@ -38,20 +40,12 @@ func (u *enrollmentUsecase) GetAllEnrollments() ([]entity.Enrollment, error) {
 	return u.enrollmentRepo.FindAll()
 }
 
-func (u *enrollmentUsecase) CreateEnrollment(enrollment *entity.Enrollment) error {
-	// currentEnrollment, err := osEnrollment.Current()
-	// if err != nil {
-	// 	return err
-	// }
-	
-	// idInt, err := strconv.Atoi(currentEnrollment.Uid)
-	// if err != nil {
-	// 	return err
-	// }
+func (u *enrollmentUsecase) CreateEnrollment(enrollment *entity.Enrollment, ctx context.Context) error {
 
-	// id := new(uint)
-    // *id = uint(idInt)
-	
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }	
 	errCreate := u.enrollmentRepo.Create(enrollment)
 	if errCreate != nil {
 		return errCreate
@@ -63,7 +57,7 @@ func (u *enrollmentUsecase) CreateEnrollment(enrollment *entity.Enrollment) erro
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// EnrollmentID: id,
+		UserID: userClaims.ID,
 		Action: "CREATE",
 		EntityType: "ENROLLMENT",
 		EntityID: enrollment.ID,
@@ -77,8 +71,12 @@ func (u *enrollmentUsecase) CreateEnrollment(enrollment *entity.Enrollment) erro
 	return nil
 }
 
-func (u *enrollmentUsecase) UpdateEnrollment(id uint, enrollment *entity.Enrollment) error {
+func (u *enrollmentUsecase) UpdateEnrollment(id uint, enrollment *entity.Enrollment,ctx context.Context) error {
 	
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errUpdate := u.enrollmentRepo.Update(id, enrollment)
 	if errUpdate != nil {
 		return errUpdate
@@ -92,7 +90,7 @@ func (u *enrollmentUsecase) UpdateEnrollment(id uint, enrollment *entity.Enrollm
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// EnrollmentID: id,
+		UserID: userClaims.ID,
 		Action: "UPDATE",
 		EntityType: "ENROLLMENT",
 		EntityID: id,
@@ -106,9 +104,14 @@ func (u *enrollmentUsecase) UpdateEnrollment(id uint, enrollment *entity.Enrollm
 	return nil
 }
 
-func (u *enrollmentUsecase) DeleteEnrollment(id uint) error {
+func (u *enrollmentUsecase) DeleteEnrollment(id uint, ctx context.Context) error {
+	
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// EnrollmentID: id,
+		UserID: userClaims.ID,
 		Action: "DELETE",
 		EntityType: "ENROLLMENT",
 		EntityID: id,

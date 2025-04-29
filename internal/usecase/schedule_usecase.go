@@ -3,16 +3,18 @@ package usecase
 import (
 	"api/internal/entity"
 	"api/internal/repository"
+	"context"
 	"encoding/json"
+	"errors"
 
 	"gorm.io/gorm"
 )
 
 type ScheduleUsecase interface {
 	GetAllSchedules() ([]entity.Schedule, error)
-	CreateSchedule(schedule *entity.Schedule) error
-	UpdateSchedule(id uint, schedule *entity.Schedule) error
-	DeleteSchedule(id uint) error
+	CreateSchedule(schedule *entity.Schedule, ctx context.Context) error
+	UpdateSchedule(id uint, schedule *entity.Schedule, ctx context.Context) error
+	DeleteSchedule(id uint,ctx context.Context) error
 	FindByIdSchedule(id uint) (entity.Schedule, error)
 }
 
@@ -38,20 +40,11 @@ func (u *scheduleUsecase) GetAllSchedules() ([]entity.Schedule, error) {
 	return u.scheduleRepo.FindAll()
 }
 
-func (u *scheduleUsecase) CreateSchedule(schedule *entity.Schedule) error {
-	// currentSchedule, err := osSchedule.Current()
-	// if err != nil {
-	// 	return err
-	// }
-	
-	// idInt, err := strconv.Atoi(currentSchedule.Uid)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// id := new(uint)
-    // *id = uint(idInt)
-	
+func (u *scheduleUsecase) CreateSchedule(schedule *entity.Schedule, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errCreate := u.scheduleRepo.Create(schedule)
 	if errCreate != nil {
 		return errCreate
@@ -63,7 +56,7 @@ func (u *scheduleUsecase) CreateSchedule(schedule *entity.Schedule) error {
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// ScheduleID: id,
+		UserID:userClaims.ID ,
 		Action: "CREATE",
 		EntityType: "SCHEDULE",
 		EntityID: schedule.ID,
@@ -77,8 +70,11 @@ func (u *scheduleUsecase) CreateSchedule(schedule *entity.Schedule) error {
 	return nil
 }
 
-func (u *scheduleUsecase) UpdateSchedule(id uint, schedule *entity.Schedule) error {
-	
+func (u *scheduleUsecase) UpdateSchedule(id uint, schedule *entity.Schedule, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errUpdate := u.scheduleRepo.Update(id, schedule)
 	if errUpdate != nil {
 		return errUpdate
@@ -92,7 +88,7 @@ func (u *scheduleUsecase) UpdateSchedule(id uint, schedule *entity.Schedule) err
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// ScheduleID: id,
+		UserID: userClaims.ID,
 		Action: "UPDATE",
 		EntityType: "SCHEDULE",
 		EntityID: id,
@@ -106,9 +102,13 @@ func (u *scheduleUsecase) UpdateSchedule(id uint, schedule *entity.Schedule) err
 	return nil
 }
 
-func (u *scheduleUsecase) DeleteSchedule(id uint) error {
+func (u *scheduleUsecase) DeleteSchedule(id uint, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// ScheduleID: id,
+		UserID: userClaims.ID,
 		Action: "DELETE",
 		EntityType: "SCHEDULE",
 		EntityID: id,

@@ -26,7 +26,7 @@ func NewEnrollmentRepository(db *gorm.DB) EnrollmentRepository {
 
 func (r *enrollmentRepository) FindAll() ([]entity.Enrollment, error) {
 	var enrollments []entity.Enrollment
-	if err := r.db.Preload("CreatedByUser").Find(&enrollments).Error; err != nil {
+	if err := r.db.Preload("Student").Preload("Course").Find(&enrollments).Error; err != nil {
 		return nil, err
 	}
 	return enrollments, nil
@@ -37,7 +37,7 @@ func (r *enrollmentRepository) FindById(id uint) (entity.Enrollment, error) {
     var enrollment entity.Enrollment
 
     // Query untuk mencari enrollment berdasarkan ID
-    result := r.db.Preload("CreatedByUser").First(&enrollment, id)
+    result := r.db.Preload("Student").Preload("Course").First(&enrollment, id)
 
     if result.Error == nil {
     	return enrollment, nil

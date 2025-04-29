@@ -26,7 +26,7 @@ func NewStudentRepository(db *gorm.DB) StudentRepository {
 
 func (r *studentRepository) FindAll() ([]entity.Student, error) {
 	var students []entity.Student
-	if err := r.db.Preload("CreatedByUser").Find(&students).Error; err != nil {
+	if err := r.db.Preload("User").Preload("StudyProgram").Find(&students).Error; err != nil {
 		return nil, err
 	}
 	return students, nil
@@ -37,7 +37,7 @@ func (r *studentRepository) FindById(id uint) (entity.Student, error) {
     var student entity.Student
 
     // Query untuk mencari student berdasarkan ID
-    result := r.db.Preload("CreatedByUser").First(&student, id)
+    result := r.db.Preload("User").Preload("StudyProgram").First(&student, id)
 
     if result.Error == nil {
     	return student, nil

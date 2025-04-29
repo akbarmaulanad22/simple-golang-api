@@ -3,16 +3,18 @@ package usecase
 import (
 	"api/internal/entity"
 	"api/internal/repository"
+	"context"
 	"encoding/json"
+	"errors"
 
 	"gorm.io/gorm"
 )
 
 type StudentUsecase interface {
 	GetAllStudents() ([]entity.Student, error)
-	CreateStudent(student *entity.Student) error
-	UpdateStudent(id uint, student *entity.Student) error
-	DeleteStudent(id uint) error
+	CreateStudent(student *entity.Student, ctx context.Context) error
+	UpdateStudent(id uint, student *entity.Student, ctx context.Context) error
+	DeleteStudent(id uint, ctx context.Context) error
 	FindByIdStudent(id uint) (entity.Student, error)
 }
 
@@ -38,19 +40,11 @@ func (u *studentUsecase) GetAllStudents() ([]entity.Student, error) {
 	return u.studentRepo.FindAll()
 }
 
-func (u *studentUsecase) CreateStudent(student *entity.Student) error {
-	// currentStudent, err := osStudent.Current()
-	// if err != nil {
-	// 	return err
-	// }
-	
-	// idInt, err := strconv.Atoi(currentStudent.Uid)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// id := new(uint)
-    // *id = uint(idInt)
+func (u *studentUsecase) CreateStudent(student *entity.Student, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	
 	errCreate := u.studentRepo.Create(student)
 	if errCreate != nil {
@@ -63,7 +57,7 @@ func (u *studentUsecase) CreateStudent(student *entity.Student) error {
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// StudentID: id,
+		UserID: userClaims.ID,
 		Action: "CREATE",
 		EntityType: "STUDENT",
 		EntityID: student.ID,
@@ -77,8 +71,11 @@ func (u *studentUsecase) CreateStudent(student *entity.Student) error {
 	return nil
 }
 
-func (u *studentUsecase) UpdateStudent(id uint, student *entity.Student) error {
-	
+func (u *studentUsecase) UpdateStudent(id uint, student *entity.Student, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errUpdate := u.studentRepo.Update(id, student)
 	if errUpdate != nil {
 		return errUpdate
@@ -92,7 +89,7 @@ func (u *studentUsecase) UpdateStudent(id uint, student *entity.Student) error {
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// StudentID: id,
+		UserID: userClaims.ID,
 		Action: "UPDATE",
 		EntityType: "STUDENT",
 		EntityID: id,
@@ -106,9 +103,13 @@ func (u *studentUsecase) UpdateStudent(id uint, student *entity.Student) error {
 	return nil
 }
 
-func (u *studentUsecase) DeleteStudent(id uint) error {
+func (u *studentUsecase) DeleteStudent(id uint, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// StudentID: id,
+		UserID: userClaims.ID,
 		Action: "DELETE",
 		EntityType: "STUDENT",
 		EntityID: id,

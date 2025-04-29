@@ -58,7 +58,7 @@ func (c *CourseController) CreateCourse(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err := c.courseUsecase.CreateCourse(&course)
+	err := c.courseUsecase.CreateCourse(&course, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,7 +96,7 @@ func (c *CourseController) UpdateCourse(w http.ResponseWriter, r *http.Request) 
 	}
 
 
-	err = c.courseUsecase.UpdateCourse(uint(id), &course)
+	err = c.courseUsecase.UpdateCourse(uint(id), &course, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,7 +126,7 @@ func (c *CourseController) DeleteCourse(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = c.courseUsecase.DeleteCourse(uint(id))
+	err = c.courseUsecase.DeleteCourse(uint(id),r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

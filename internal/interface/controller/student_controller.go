@@ -58,7 +58,7 @@ func (c *StudentController) CreateStudent(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err := c.studentUsecase.CreateStudent(&student)
+	err := c.studentUsecase.CreateStudent(&student, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,7 +96,7 @@ func (c *StudentController) UpdateStudent(w http.ResponseWriter, r *http.Request
 	}
 
 
-	err = c.studentUsecase.UpdateStudent(uint(id), &student)
+	err = c.studentUsecase.UpdateStudent(uint(id), &student, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,7 +126,7 @@ func (c *StudentController) DeleteStudent(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = c.studentUsecase.DeleteStudent(uint(id))
+	err = c.studentUsecase.DeleteStudent(uint(id), r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

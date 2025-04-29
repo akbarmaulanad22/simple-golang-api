@@ -58,7 +58,7 @@ func (c *AnnouncementController) CreateAnnouncement(w http.ResponseWriter, r *ht
 		return
 	}
 
-	err := c.announcementUsecase.CreateAnnouncement(&announcement)
+	err := c.announcementUsecase.CreateAnnouncement(&announcement, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,7 +96,7 @@ func (c *AnnouncementController) UpdateAnnouncement(w http.ResponseWriter, r *ht
 	}
 
 
-	err = c.announcementUsecase.UpdateAnnouncement(uint(id), &announcement)
+	err = c.announcementUsecase.UpdateAnnouncement(uint(id), &announcement, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,7 +126,7 @@ func (c *AnnouncementController) DeleteAnnouncement(w http.ResponseWriter, r *ht
 		return
 	}
 
-	err = c.announcementUsecase.DeleteAnnouncement(uint(id))
+	err = c.announcementUsecase.DeleteAnnouncement(uint(id), r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

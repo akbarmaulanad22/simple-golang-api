@@ -3,16 +3,18 @@ package usecase
 import (
 	"api/internal/entity"
 	"api/internal/repository"
+	"context"
 	"encoding/json"
+	"errors"
 
 	"gorm.io/gorm"
 )
 
 type StudyProgramUsecase interface {
 	GetAllStudyPrograms() ([]entity.StudyProgram, error)
-	CreateStudyProgram(studyProgram *entity.StudyProgram) error
-	UpdateStudyProgram(id uint, studyProgram *entity.StudyProgram) error
-	DeleteStudyProgram(id uint) error
+	CreateStudyProgram(studyProgram *entity.StudyProgram, ctx context.Context) error
+	UpdateStudyProgram(id uint, studyProgram *entity.StudyProgram, ctx context.Context) error
+	DeleteStudyProgram(id uint, ctx context.Context) error
 	FindByIdStudyProgram(id uint) (entity.StudyProgram, error)
 }
 
@@ -38,19 +40,11 @@ func (u *studyProgramUsecase) GetAllStudyPrograms() ([]entity.StudyProgram, erro
 	return u.studyProgramRepo.FindAll()
 }
 
-func (u *studyProgramUsecase) CreateStudyProgram(studyProgram *entity.StudyProgram) error {
-	// currentStudyProgram, err := osStudyProgram.Current()
-	// if err != nil {
-	// 	return err
-	// }
-	
-	// idInt, err := strconv.Atoi(currentStudyProgram.Uid)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// id := new(uint)
-    // *id = uint(idInt)
+func (u *studyProgramUsecase) CreateStudyProgram(studyProgram *entity.StudyProgram, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	
 	errCreate := u.studyProgramRepo.Create(studyProgram)
 	if errCreate != nil {
@@ -63,7 +57,7 @@ func (u *studyProgramUsecase) CreateStudyProgram(studyProgram *entity.StudyProgr
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// StudyProgramID: id,
+		UserID: userClaims.ID,
 		Action: "CREATE",
 		EntityType: "STUDYPROGRAM",
 		EntityID: studyProgram.ID,
@@ -77,7 +71,11 @@ func (u *studyProgramUsecase) CreateStudyProgram(studyProgram *entity.StudyProgr
 	return nil
 }
 
-func (u *studyProgramUsecase) UpdateStudyProgram(id uint, studyProgram *entity.StudyProgram) error {
+func (u *studyProgramUsecase) UpdateStudyProgram(id uint, studyProgram *entity.StudyProgram, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	
 	errUpdate := u.studyProgramRepo.Update(id, studyProgram)
 	if errUpdate != nil {
@@ -92,7 +90,7 @@ func (u *studyProgramUsecase) UpdateStudyProgram(id uint, studyProgram *entity.S
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// StudyProgramID: id,
+		UserID: userClaims.ID,
 		Action: "UPDATE",
 		EntityType: "STUDYPROGRAM",
 		EntityID: id,
@@ -106,9 +104,13 @@ func (u *studyProgramUsecase) UpdateStudyProgram(id uint, studyProgram *entity.S
 	return nil
 }
 
-func (u *studyProgramUsecase) DeleteStudyProgram(id uint) error {
+func (u *studyProgramUsecase) DeleteStudyProgram(id uint, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// StudyProgramID: id,
+		UserID: userClaims.ID,
 		Action: "DELETE",
 		EntityType: "STUDYPROGRAM",
 		EntityID: id,

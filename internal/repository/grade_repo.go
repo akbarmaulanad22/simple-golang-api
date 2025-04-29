@@ -26,7 +26,7 @@ func NewGradeRepository(db *gorm.DB) GradeRepository {
 
 func (r *gradeRepository) FindAll() ([]entity.Grade, error) {
 	var grades []entity.Grade
-	if err := r.db.Preload("CreatedByUser").Find(&grades).Error; err != nil {
+	if err := r.db.Preload("Enrollment").Find(&grades).Error; err != nil {
 		return nil, err
 	}
 	return grades, nil
@@ -37,7 +37,7 @@ func (r *gradeRepository) FindById(id uint) (entity.Grade, error) {
     var grade entity.Grade
 
     // Query untuk mencari grade berdasarkan ID
-    result := r.db.Preload("CreatedByUser").First(&grade, id)
+    result := r.db.Preload("Enrollment").First(&grade, id)
 
     if result.Error == nil {
     	return grade, nil

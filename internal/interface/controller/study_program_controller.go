@@ -58,7 +58,7 @@ func (c *StudyProgramController) CreateStudyProgram(w http.ResponseWriter, r *ht
 		return
 	}
 
-	err := c.studyProgramUsecase.CreateStudyProgram(&studyProgram)
+	err := c.studyProgramUsecase.CreateStudyProgram(&studyProgram, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,7 +96,7 @@ func (c *StudyProgramController) UpdateStudyProgram(w http.ResponseWriter, r *ht
 	}
 
 
-	err = c.studyProgramUsecase.UpdateStudyProgram(uint(id), &studyProgram)
+	err = c.studyProgramUsecase.UpdateStudyProgram(uint(id), &studyProgram, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,7 +126,7 @@ func (c *StudyProgramController) DeleteStudyProgram(w http.ResponseWriter, r *ht
 		return
 	}
 
-	err = c.studyProgramUsecase.DeleteStudyProgram(uint(id))
+	err = c.studyProgramUsecase.DeleteStudyProgram(uint(id), r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -58,7 +58,7 @@ func (c *LecturerController) CreateLecturer(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err := c.lectureUsecase.CreateLecturer(&lecture)
+	err := c.lectureUsecase.CreateLecturer(&lecture, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,7 +96,7 @@ func (c *LecturerController) UpdateLecturer(w http.ResponseWriter, r *http.Reque
 	}
 
 
-	err = c.lectureUsecase.UpdateLecturer(uint(id), &lecture)
+	err = c.lectureUsecase.UpdateLecturer(uint(id), &lecture, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,7 +126,7 @@ func (c *LecturerController) DeleteLecturer(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = c.lectureUsecase.DeleteLecturer(uint(id))
+	err = c.lectureUsecase.DeleteLecturer(uint(id), r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

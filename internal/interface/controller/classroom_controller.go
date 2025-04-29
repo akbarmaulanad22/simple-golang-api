@@ -41,6 +41,7 @@ func (c *ClassroomController) GetClassroomById(w http.ResponseWriter, r *http.Re
 }
 
 func (c *ClassroomController) GetClassrooms(w http.ResponseWriter, r *http.Request) {
+	
 	classrooms, err := c.classroomUsecase.GetAllClassrooms()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -58,7 +59,7 @@ func (c *ClassroomController) CreateClassroom(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err := c.classroomUsecase.CreateClassroom(&classroom)
+	err := c.classroomUsecase.CreateClassroom(&classroom, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,7 +97,7 @@ func (c *ClassroomController) UpdateClassroom(w http.ResponseWriter, r *http.Req
 	}
 
 
-	err = c.classroomUsecase.UpdateClassroom(uint(id), &classroom)
+	err = c.classroomUsecase.UpdateClassroom(uint(id), &classroom, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,7 +127,7 @@ func (c *ClassroomController) DeleteClassroom(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err = c.classroomUsecase.DeleteClassroom(uint(id))
+	err = c.classroomUsecase.DeleteClassroom(uint(id), r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

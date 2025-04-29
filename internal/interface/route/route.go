@@ -79,9 +79,39 @@ func SetupRoutes(router *mux.Router, db *gorm.DB) {
 
 	lecturerController := controller.NewLecturerController(db)
 
-	router.HandleFunc("/lecture", lecturerController.GetLecturers).Methods("GET")
-	router.HandleFunc("/lecture/{id}", lecturerController.GetLecturerById).Methods("GET")
-	router.HandleFunc("/lecture", lecturerController.CreateLecturer).Methods("POST")
-	router.HandleFunc("/lecture/{id}", lecturerController.UpdateLecturer).Methods("PUT")
-	router.HandleFunc("/lecture/{id}", lecturerController.DeleteLecturer).Methods("DELETE")
+	router.HandleFunc("/lecturer", lecturerController.GetLecturers).Methods("GET")
+	router.HandleFunc("/lecturer/{id}", lecturerController.GetLecturerById).Methods("GET")
+	router.HandleFunc("/lecturer", lecturerController.CreateLecturer).Methods("POST")
+	router.HandleFunc("/lecturer/{id}", lecturerController.UpdateLecturer).Methods("PUT")
+	router.HandleFunc("/lecturer/{id}", lecturerController.DeleteLecturer).Methods("DELETE")
+
+	scheduleController := controller.NewScheduleController(db)
+
+	router.HandleFunc("/schedule", scheduleController.GetSchedules).Methods("GET")
+	router.HandleFunc("/schedule/{id}", scheduleController.GetScheduleById).Methods("GET")
+	router.HandleFunc("/schedule", scheduleController.CreateSchedule).Methods("POST")
+	router.HandleFunc("/schedule/{id}", scheduleController.UpdateSchedule).Methods("PUT")
+	router.HandleFunc("/schedule/{id}", scheduleController.DeleteSchedule).Methods("DELETE")
+
+	studentController := controller.NewStudentController(db)
+
+	router.HandleFunc("/student", studentController.GetStudents).Methods("GET")
+	router.HandleFunc("/student/{id}", studentController.GetStudentById).Methods("GET")
+	router.HandleFunc("/student", studentController.CreateStudent).Methods("POST")
+	router.HandleFunc("/student/{id}", studentController.UpdateStudent).Methods("PUT")
+	router.HandleFunc("/student/{id}", studentController.DeleteStudent).Methods("DELETE")
+
+	studyProgramController := controller.NewStudyProgramController(db)
+
+	router.HandleFunc("/study-program", studyProgramController.GetStudyPrograms).Methods("GET")
+	router.HandleFunc("/study-program/{id}", studyProgramController.GetStudyProgramById).Methods("GET")
+	router.HandleFunc("/study-program", studyProgramController.CreateStudyProgram).Methods("POST")
+	router.HandleFunc("/study-program/{id}", studyProgramController.UpdateStudyProgram).Methods("PUT")
+	router.HandleFunc("/study-program/{id}", studyProgramController.DeleteStudyProgram).Methods("DELETE")
+
+	logController := controller.NewLogController(db)
+
+	router.HandleFunc("/log", logController.GetLogs).Methods("GET")
+
 }
+

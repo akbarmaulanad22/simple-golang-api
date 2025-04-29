@@ -4,16 +4,18 @@ import (
 	"api/internal/entity"
 	"api/internal/helper"
 	"api/internal/repository"
+	"context"
 	"encoding/json"
+	"errors"
 
 	"gorm.io/gorm"
 )
 
 type UserUsecase interface {
 	GetAllUsers() ([]entity.User, error)
-	CreateUser(user *entity.User) error
-	UpdateUser(id uint, user *entity.User) error
-	DeleteUser(id uint) error
+	CreateUser(user *entity.User, ctx context.Context) error
+	UpdateUser(id uint, user *entity.User, ctx context.Context) error
+	DeleteUser(id uint, ctx context.Context) error
 	FindByIdUser(id uint) (*entity.User, error)
 }
 
@@ -39,19 +41,11 @@ func (u *userUsecase) GetAllUsers() ([]entity.User, error) {
 	return u.userRepo.FindAll()
 }
 
-func (u *userUsecase) CreateUser(user *entity.User) error {
-	// currentUser, err := osUser.Current()
-	// if err != nil {
-	// 	return err
-	// }
-	
-	// idInt, err := strconv.Atoi(currentUser.Uid)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// id := new(uint)
-    // *id = uint(idInt)
+func (u *userUsecase) CreateUser(user *entity.User, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	
 	password, err := helper.HashPassword(user.Password)
 	if err != nil {
@@ -71,7 +65,7 @@ func (u *userUsecase) CreateUser(user *entity.User) error {
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// UserID: id,
+		UserID: userClaims.ID,
 		Action: "CREATE",
 		EntityType: "USER",
 		EntityID: user.ID,
@@ -85,7 +79,11 @@ func (u *userUsecase) CreateUser(user *entity.User) error {
 	return nil
 }
 
-func (u *userUsecase) UpdateUser(id uint, user *entity.User) error {
+func (u *userUsecase) UpdateUser(id uint, user *entity.User,  ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	password, err := helper.HashPassword(user.Password)
 	if err != nil {
 		return err
@@ -105,7 +103,7 @@ func (u *userUsecase) UpdateUser(id uint, user *entity.User) error {
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// UserID: id,
+		UserID :userClaims.ID,
 		Action: "UPDATE",
 		EntityType: "USER",
 		EntityID: id,
@@ -119,9 +117,13 @@ func (u *userUsecase) UpdateUser(id uint, user *entity.User) error {
 	return nil
 }
 
-func (u *userUsecase) DeleteUser(id uint) error {
+func (u *userUsecase) DeleteUser(id uint, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// UserID: id,
+		UserID: userClaims.ID,
 		Action: "DELETE",
 		EntityType: "USER",
 		EntityID: id,

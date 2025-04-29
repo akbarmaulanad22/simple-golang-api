@@ -26,7 +26,7 @@ func NewScheduleRepository(db *gorm.DB) ScheduleRepository {
 
 func (r *scheduleRepository) FindAll() ([]entity.Schedule, error) {
 	var schedules []entity.Schedule
-	if err := r.db.Preload("CreatedByUser").Find(&schedules).Error; err != nil {
+	if err := r.db.Preload("Course").Preload("Lecturer").Preload("Classroom").Find(&schedules).Error; err != nil {
 		return nil, err
 	}
 	return schedules, nil
@@ -37,7 +37,7 @@ func (r *scheduleRepository) FindById(id uint) (entity.Schedule, error) {
     var schedule entity.Schedule
 
     // Query untuk mencari schedule berdasarkan ID
-    result := r.db.Preload("CreatedByUser").First(&schedule, id)
+    result := r.db.Preload("Course").Preload("Lecturer").Preload("Classroom").First(&schedule, id)
 
     if result.Error == nil {
     	return schedule, nil

@@ -3,16 +3,18 @@ package usecase
 import (
 	"api/internal/entity"
 	"api/internal/repository"
+	"context"
 	"encoding/json"
+	"errors"
 
 	"gorm.io/gorm"
 )
 
 type AnnouncementUsecase interface {
 	GetAllAnnouncements() ([]entity.Announcement, error)
-	CreateAnnouncement(announcement *entity.Announcement) error
-	UpdateAnnouncement(id uint, announcement *entity.Announcement) error
-	DeleteAnnouncement(id uint) error
+	CreateAnnouncement(announcement *entity.Announcement, ctx context.Context) error
+	UpdateAnnouncement(id uint, announcement *entity.Announcement, ctx context.Context) error
+	DeleteAnnouncement(id uint, ctx context.Context ) error
 	FindByIdAnnouncement(id uint) (entity.Announcement, error)
 }
 
@@ -38,19 +40,11 @@ func (u *announcementUsecase) GetAllAnnouncements() ([]entity.Announcement, erro
 	return u.announcementRepo.FindAll()
 }
 
-func (u *announcementUsecase) CreateAnnouncement(announcement *entity.Announcement) error {
-	// currentAnnouncement, err := osAnnouncement.Current()
-	// if err != nil {
-	// 	return err
-	// }
-	
-	// idInt, err := strconv.Atoi(currentAnnouncement.Uid)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// id := new(uint)
-    // *id = uint(idInt)
+func (u *announcementUsecase) CreateAnnouncement(announcement *entity.Announcement, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	
 	errCreate := u.announcementRepo.Create(announcement)
 	if errCreate != nil {
@@ -63,7 +57,7 @@ func (u *announcementUsecase) CreateAnnouncement(announcement *entity.Announceme
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// AnnouncementID: id,
+		UserID: userClaims.ID,
 		Action: "CREATE",
 		EntityType: "ANNOUNCEMENT",
 		EntityID: announcement.ID,
@@ -77,7 +71,12 @@ func (u *announcementUsecase) CreateAnnouncement(announcement *entity.Announceme
 	return nil
 }
 
-func (u *announcementUsecase) UpdateAnnouncement(id uint, announcement *entity.Announcement) error {
+func (u *announcementUsecase) UpdateAnnouncement(id uint, announcement *entity.Announcement, ctx context.Context) error {
+
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	
 	errUpdate := u.announcementRepo.Update(id, announcement)
 	if errUpdate != nil {
@@ -92,7 +91,7 @@ func (u *announcementUsecase) UpdateAnnouncement(id uint, announcement *entity.A
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// AnnouncementID: id,
+		UserID: userClaims.ID,
 		Action: "UPDATE",
 		EntityType: "ANNOUNCEMENT",
 		EntityID: id,
@@ -106,9 +105,14 @@ func (u *announcementUsecase) UpdateAnnouncement(id uint, announcement *entity.A
 	return nil
 }
 
-func (u *announcementUsecase) DeleteAnnouncement(id uint) error {
+func (u *announcementUsecase) DeleteAnnouncement(id uint, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
+	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// AnnouncementID: id,
+		UserID: userClaims.ID,
 		Action: "DELETE",
 		EntityType: "ANNOUNCEMENT",
 		EntityID: id,

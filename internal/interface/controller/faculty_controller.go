@@ -58,7 +58,7 @@ func (c *FacultyController) CreateFaculty(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err := c.facultyUsecase.CreateFaculty(&faculty)
+	err := c.facultyUsecase.CreateFaculty(&faculty, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,7 +96,7 @@ func (c *FacultyController) UpdateFaculty(w http.ResponseWriter, r *http.Request
 	}
 
 
-	err = c.facultyUsecase.UpdateFaculty(uint(id), &faculty)
+	err = c.facultyUsecase.UpdateFaculty(uint(id), &faculty, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,7 +126,7 @@ func (c *FacultyController) DeleteFaculty(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = c.facultyUsecase.DeleteFaculty(uint(id))
+	err = c.facultyUsecase.DeleteFaculty(uint(id),  r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

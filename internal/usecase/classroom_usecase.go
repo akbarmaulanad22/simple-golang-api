@@ -3,16 +3,18 @@ package usecase
 import (
 	"api/internal/entity"
 	"api/internal/repository"
+	"context"
 	"encoding/json"
+	"errors"
 
 	"gorm.io/gorm"
 )
 
 type ClassroomUsecase interface {
 	GetAllClassrooms() ([]entity.Classroom, error)
-	CreateClassroom(classroom *entity.Classroom) error
-	UpdateClassroom(id uint, classroom *entity.Classroom) error
-	DeleteClassroom(id uint) error
+	CreateClassroom(classroom *entity.Classroom, ctx context.Context) error
+	UpdateClassroom(id uint, classroom *entity.Classroom, ctx context.Context) error
+	DeleteClassroom(id uint, ctx context.Context) error
 	FindByIdClassroom(id uint) (entity.Classroom, error)
 }
 
@@ -38,19 +40,11 @@ func (u *classroomUsecase) GetAllClassrooms() ([]entity.Classroom, error) {
 	return u.classroomRepo.FindAll()
 }
 
-func (u *classroomUsecase) CreateClassroom(classroom *entity.Classroom) error {
-	// currentClassroom, err := osClassroom.Current()
-	// if err != nil {
-	// 	return err
-	// }
-	
-	// idInt, err := strconv.Atoi(currentClassroom.Uid)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// id := new(uint)
-    // *id = uint(idInt)
+func (u *classroomUsecase) CreateClassroom(classroom *entity.Classroom, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	
 	errCreate := u.classroomRepo.Create(classroom)
 	if errCreate != nil {
@@ -63,7 +57,7 @@ func (u *classroomUsecase) CreateClassroom(classroom *entity.Classroom) error {
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// ClassroomID: id,
+		UserID: userClaims.ID,
 		Action: "CREATE",
 		EntityType: "CLASSROOM",
 		EntityID: classroom.ID,
@@ -77,7 +71,12 @@ func (u *classroomUsecase) CreateClassroom(classroom *entity.Classroom) error {
 	return nil
 }
 
-func (u *classroomUsecase) UpdateClassroom(id uint, classroom *entity.Classroom) error {
+func (u *classroomUsecase) UpdateClassroom(id uint, classroom *entity.Classroom, ctx context.Context) error {
+
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
 	
 	errUpdate := u.classroomRepo.Update(id, classroom)
 	if errUpdate != nil {
@@ -92,7 +91,7 @@ func (u *classroomUsecase) UpdateClassroom(id uint, classroom *entity.Classroom)
 	}
 	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// ClassroomID: id,
+		UserID: userClaims.ID,
 		Action: "UPDATE",
 		EntityType: "CLASSROOM",
 		EntityID: id,
@@ -106,9 +105,14 @@ func (u *classroomUsecase) UpdateClassroom(id uint, classroom *entity.Classroom)
 	return nil
 }
 
-func (u *classroomUsecase) DeleteClassroom(id uint) error {
+func (u *classroomUsecase) DeleteClassroom(id uint, ctx context.Context) error {
+	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
+    if !ok {
+        return errors.New("user not authenticated")
+    }
+	
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		// ClassroomID: id,
+		UserID: userClaims.ID,
 		Action: "DELETE",
 		EntityType: "CLASSROOM",
 		EntityID: id,

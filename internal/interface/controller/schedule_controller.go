@@ -58,7 +58,7 @@ func (c *ScheduleController) CreateSchedule(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err := c.scheduleUsecase.CreateSchedule(&schedule)
+	err := c.scheduleUsecase.CreateSchedule(&schedule, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,7 +96,7 @@ func (c *ScheduleController) UpdateSchedule(w http.ResponseWriter, r *http.Reque
 	}
 
 
-	err = c.scheduleUsecase.UpdateSchedule(uint(id), &schedule)
+	err = c.scheduleUsecase.UpdateSchedule(uint(id), &schedule, r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,7 +126,7 @@ func (c *ScheduleController) DeleteSchedule(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = c.scheduleUsecase.DeleteSchedule(uint(id))
+	err = c.scheduleUsecase.DeleteSchedule(uint(id), r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
