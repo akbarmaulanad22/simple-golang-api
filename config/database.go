@@ -27,8 +27,18 @@ func InitDB() *gorm.DB {
 
 	// Auto Migrate
 	db.AutoMigrate(&models.User{})
-	db.AutoMigrate(&models.Log{})
 	db.AutoMigrate(&models.Announcement{})
+	db.AutoMigrate(&models.Classroom{})
+	db.AutoMigrate(&models.Course{})
+	db.AutoMigrate(&models.Lecturer{})
+	db.AutoMigrate(&models.Schedule{})
+	db.AutoMigrate(&models.Student{})
+	db.AutoMigrate(&models.Attendance{})
+	db.AutoMigrate(&models.Enrollment{})
+	db.AutoMigrate(&models.Faculty{})
+	db.AutoMigrate(&models.Grade{})
+	db.AutoMigrate(&models.Log{})
+	db.AutoMigrate(&models.StudyProgram{})
 
 
 	return db

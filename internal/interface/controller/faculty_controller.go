@@ -12,22 +12,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserController struct {
-	userUsecase usecase.UserUsecase
+type FacultyController struct {
+	facultyUsecase usecase.FacultyUsecase
 }
 
-func NewUserController(db *gorm.DB) *UserController {
-	return &UserController{
-		userUsecase: usecase.NewUserUsecase(db),
+func NewFacultyController(db *gorm.DB) *FacultyController {
+	return &FacultyController{
+		facultyUsecase: usecase.NewFacultyUsecase(db),
 	}
 }
 
-func (c *UserController) Login(w http.ResponseWriter, r *http.Request)  {
-	
-}
-
-
-func (c *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
+func (c *FacultyController) GetFacultyById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
 	if err != nil {
@@ -35,7 +30,7 @@ func (c *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := c.userUsecase.FindByIdUser(uint(id))
+	user, err := c.facultyUsecase.FindByIdFaculty(uint(id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -45,25 +40,31 @@ func (c *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-func (c *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := c.userUsecase.GetAllUsers()
+func (c *FacultyController) GetFacultys(w http.ResponseWriter, r *http.Request) {
+	facultys, err := c.facultyUsecase.GetAllFacultys()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(facultys)
 }
 
-func (c *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user entity.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+func (c *FacultyController) CreateFaculty(w http.ResponseWriter, r *http.Request) {
+	var faculty entity.Faculty
+	if err := json.NewDecoder(r.Body).Decode(&faculty); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err := c.userUsecase.CreateUser(&user)
+	err := c.facultyUsecase.CreateFaculty(&faculty)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	facultyResponse, err := c.facultyUsecase.FindByIdFaculty(faculty.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -71,10 +72,10 @@ func (c *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(facultyResponse)
 }
 
-func (c *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (c *FacultyController) UpdateFaculty(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
 	if err != nil {
@@ -82,29 +83,36 @@ func (c *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user entity.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	var faculty entity.Faculty
+	if err := json.NewDecoder(r.Body).Decode(&faculty); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	_, err = c.userUsecase.FindByIdUser(uint(id))
+	_, err = c.facultyUsecase.FindByIdFaculty(uint(id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	err = c.userUsecase.UpdateUser(uint(id), &user)
+
+	err = c.facultyUsecase.UpdateFaculty(uint(id), &faculty)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	facultyResponse, err := c.facultyUsecase.FindByIdFaculty(faculty.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(facultyResponse)
 }
 
-func (c *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
+func (c *FacultyController) DeleteFaculty(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
 	if err != nil {
@@ -112,13 +120,13 @@ func (c *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = c.userUsecase.FindByIdUser(uint(id))
+	_, err = c.facultyUsecase.FindByIdFaculty(uint(id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	err = c.userUsecase.DeleteUser(uint(id))
+	err = c.facultyUsecase.DeleteFaculty(uint(id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

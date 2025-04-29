@@ -12,22 +12,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserController struct {
-	userUsecase usecase.UserUsecase
+type GradeController struct {
+	gradeUsecase usecase.GradeUsecase
 }
 
-func NewUserController(db *gorm.DB) *UserController {
-	return &UserController{
-		userUsecase: usecase.NewUserUsecase(db),
+func NewGradeController(db *gorm.DB) *GradeController {
+	return &GradeController{
+		gradeUsecase: usecase.NewGradeUsecase(db),
 	}
 }
 
-func (c *UserController) Login(w http.ResponseWriter, r *http.Request)  {
-	
-}
-
-
-func (c *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
+func (c *GradeController) GetGradeById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
 	if err != nil {
@@ -35,7 +30,7 @@ func (c *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := c.userUsecase.FindByIdUser(uint(id))
+	user, err := c.gradeUsecase.FindByIdGrade(uint(id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -45,25 +40,31 @@ func (c *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-func (c *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := c.userUsecase.GetAllUsers()
+func (c *GradeController) GetGrades(w http.ResponseWriter, r *http.Request) {
+	grades, err := c.gradeUsecase.GetAllGrades()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(grades)
 }
 
-func (c *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user entity.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+func (c *GradeController) CreateGrade(w http.ResponseWriter, r *http.Request) {
+	var grade entity.Grade
+	if err := json.NewDecoder(r.Body).Decode(&grade); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err := c.userUsecase.CreateUser(&user)
+	err := c.gradeUsecase.CreateGrade(&grade)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	gradeResponse, err := c.gradeUsecase.FindByIdGrade(grade.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -71,10 +72,10 @@ func (c *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(gradeResponse)
 }
 
-func (c *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (c *GradeController) UpdateGrade(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
 	if err != nil {
@@ -82,29 +83,36 @@ func (c *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user entity.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	var grade entity.Grade
+	if err := json.NewDecoder(r.Body).Decode(&grade); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	_, err = c.userUsecase.FindByIdUser(uint(id))
+	_, err = c.gradeUsecase.FindByIdGrade(uint(id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	err = c.userUsecase.UpdateUser(uint(id), &user)
+
+	err = c.gradeUsecase.UpdateGrade(uint(id), &grade)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	gradeResponse, err := c.gradeUsecase.FindByIdGrade(grade.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(gradeResponse)
 }
 
-func (c *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
+func (c *GradeController) DeleteGrade(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
 	if err != nil {
@@ -112,13 +120,13 @@ func (c *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = c.userUsecase.FindByIdUser(uint(id))
+	_, err = c.gradeUsecase.FindByIdGrade(uint(id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	err = c.userUsecase.DeleteUser(uint(id))
+	err = c.gradeUsecase.DeleteGrade(uint(id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

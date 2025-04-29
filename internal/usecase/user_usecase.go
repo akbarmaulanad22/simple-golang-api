@@ -14,7 +14,7 @@ type UserUsecase interface {
 	CreateUser(user *entity.User) error
 	UpdateUser(id uint, user *entity.User) error
 	DeleteUser(id uint) error
-	FindByIdUser(id uint) (entity.User, error)
+	FindByIdUser(id uint) (*entity.User, error)
 }
 
 type userUsecase struct {
@@ -29,7 +29,7 @@ func NewUserUsecase(db *gorm.DB) UserUsecase {
 	}
 }
 
-func (u *userUsecase) FindByIdUser(id uint) (entity.User, error) {
+func (u *userUsecase) FindByIdUser(id uint) (*entity.User, error) {
 	
 	return u.userRepo.FindById(id)
 	
