@@ -21,20 +21,20 @@ type UserUsecase interface {
 
 type userUsecase struct {
 	userRepo repository.UserRepository
-	logRepo repository.LogRepository
+	logRepo  repository.LogRepository
 }
 
 func NewUserUsecase(db *gorm.DB) UserUsecase {
 	return &userUsecase{
 		userRepo: repository.NewUserRepository(db),
-		logRepo: repository.NewLogRepository(db),
+		logRepo:  repository.NewLogRepository(db),
 	}
 }
 
 func (u *userUsecase) FindByIdUser(id uint) (*entity.User, error) {
-	
+
 	return u.userRepo.FindById(id)
-	
+
 }
 
 func (u *userUsecase) GetAllUsers() ([]entity.User, error) {
@@ -43,17 +43,17 @@ func (u *userUsecase) GetAllUsers() ([]entity.User, error) {
 
 func (u *userUsecase) CreateUser(user *entity.User, ctx context.Context) error {
 	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
-    if !ok {
-        return errors.New("user not authenticated")
-    }
-	
+	if !ok {
+		return errors.New("user not authenticated")
+	}
+
 	password, err := helper.HashPassword(user.Password)
 	if err != nil {
 		return err
 	}
-	
+
 	user.Password = string(password)
-	
+
 	errCreate := u.userRepo.Create(user)
 	if errCreate != nil {
 		return errCreate
@@ -63,32 +63,32 @@ func (u *userUsecase) CreateUser(user *entity.User, ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	
+
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		UserID: userClaims.ID,
-		Action: "CREATE",
+		UserID:     userClaims.ID,
+		Action:     "CREATE",
 		EntityType: "USER",
-		EntityID: user.ID,
-		Details: string(jsonBytes),
+		EntityID:   user.ID,
+		Details:    string(jsonBytes),
 	})
 
-	if errCreateLog != nil{
+	if errCreateLog != nil {
 		return errCreateLog
 	}
 
 	return nil
 }
 
-func (u *userUsecase) UpdateUser(id uint, user *entity.User,  ctx context.Context) error {
+func (u *userUsecase) UpdateUser(id uint, user *entity.User, ctx context.Context) error {
 	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
-    if !ok {
-        return errors.New("user not authenticated")
-    }
+	if !ok {
+		return errors.New("user not authenticated")
+	}
 	password, err := helper.HashPassword(user.Password)
 	if err != nil {
 		return err
 	}
-	
+
 	user.ID = id
 	user.Password = string(password)
 
@@ -101,35 +101,35 @@ func (u *userUsecase) UpdateUser(id uint, user *entity.User,  ctx context.Contex
 	if err != nil {
 		return err
 	}
-	
+
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		UserID :userClaims.ID,
-		Action: "UPDATE",
+		UserID:     userClaims.ID,
+		Action:     "UPDATE",
 		EntityType: "USER",
-		EntityID: id,
-		Details: string(jsonBytes),
+		EntityID:   id,
+		Details:    string(jsonBytes),
 	})
 
-	if errCreateLog != nil{
+	if errCreateLog != nil {
 		return errCreateLog
 	}
-	
+
 	return nil
 }
 
 func (u *userUsecase) DeleteUser(id uint, ctx context.Context) error {
 	userClaims, ok := ctx.Value("user").(*entity.CustomClaims)
-    if !ok {
-        return errors.New("user not authenticated")
-    }
+	if !ok {
+		return errors.New("user not authenticated")
+	}
 	errCreateLog := u.logRepo.Create(&entity.Log{
-		UserID: userClaims.ID,
-		Action: "DELETE",
+		UserID:     userClaims.ID,
+		Action:     "DELETE",
 		EntityType: "USER",
-		EntityID: id,
+		EntityID:   id,
 	})
 
-	if errCreateLog != nil{
+	if errCreateLog != nil {
 		return errCreateLog
 	}
 

@@ -9,9 +9,9 @@ import (
 )
 
 func SetupRoutes(router *mux.Router, db *gorm.DB) {
-	
+
 	router.Use(middleware.AuthMiddleware)
-	
+
 	userController := controller.NewUserController(db)
 
 	router.HandleFunc("/user", userController.GetUsers).Methods("GET")
@@ -59,7 +59,6 @@ func SetupRoutes(router *mux.Router, db *gorm.DB) {
 	router.HandleFunc("/enrollment", enrollmentController.CreateEnrollment).Methods("POST")
 	router.HandleFunc("/enrollment/{id}", enrollmentController.UpdateEnrollment).Methods("PUT")
 	router.HandleFunc("/enrollment/{id}", enrollmentController.DeleteEnrollment).Methods("DELETE")
-
 
 	facultyController := controller.NewFacultyController(db)
 
@@ -114,4 +113,3 @@ func SetupRoutes(router *mux.Router, db *gorm.DB) {
 	router.HandleFunc("/log", logController.GetLogs).Methods("GET")
 
 }
-

@@ -43,7 +43,6 @@ func main() {
 
 	// === PROTECTED ROUTES (dengan middleware auth) ===
     protectedRoutes := router.PathPrefix("/api/v1").Subrouter()
-    protectedRoutes.Use(middleware.AuthMiddleware)
 	
 	// Setup routes
 	route.SetupRoutes(protectedRoutes, db)

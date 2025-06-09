@@ -4,7 +4,7 @@ import "time"
 
 type Log struct {
 	ID         uint      `json:"id" gorm:"primaryKey"`
-	UserID     uint     `json:"user_id" gorm:"not null"`           // Null jika tidak ada user yang terkait
+	UserID     uint      `json:"user_id" gorm:"not null"`               // Null jika tidak ada user yang terkait
 	Action     string    `json:"action" gorm:"not null"`                // Contoh: "create", "update", "delete"
 	EntityType string    `json:"entity_type" gorm:"not null"`           // Contoh: "user", "student", "course"
 	EntityID   uint      `json:"entity_id" gorm:"not null"`             // ID dari entitas yang terpengaruh
